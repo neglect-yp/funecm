@@ -21,22 +21,11 @@
  */
 void afftopro(PROJECTIVE_POINT R, const AFFINE_POINT P, const mpz_t N)
 {
-	gmp_randstate_t state;
-	gmp_randinit_default(state);
-	gmp_randseed_ui(state, (unsigned long int)time(NULL));
-
-	mpz_urandomm(R->Z, state, N);
-	if (mpz_cmp_ui(R->Z, 0) == 0)
-		mpz_add_ui(R->Z, R->Z, 1);
-
-	mpz_mul(R->X, P->x, R->Z);
-	mpz_mul(R->Y, P->y, R->Z);
-
-	mpz_mod(R->X, R->X, N);
-	mpz_mod(R->Y, R->Y, N);
-
-	gmp_randclear(state);
+	mpz_set(R->X, P->x);
+	mpz_set(R->Y, P->y);
+	mpz_set_ui(R->Z, 1);
 }
+
 
 /*
  * Projective座標系からAffine座標系に変換する

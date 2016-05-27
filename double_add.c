@@ -16,7 +16,8 @@
  * 2014/11/02 引数の一部をconstに変更
  *            メモリリーク修正
  * 2015/10/** 前年度より計算式を変更
- *2016/03/23 mul処理の下にmod処理を追加
+ * 2016/03/23 mul処理の下にmod処理を追加
+ * 2016/05/27 a=-1に変更
  */
 #include "gmp.h"
 #include "point.h"
@@ -33,7 +34,7 @@ void double_add(PROJECTIVE_POINT R, PROJECTIVE_POINT P, /*const mpz_t a,*/ const
 	mpz_t B;
 	mpz_t C;
 	mpz_t D;
-	//mpz_t E;
+	mpz_t E;
 	mpz_t F;
 	mpz_t H;
 	mpz_t J;
@@ -44,7 +45,7 @@ void double_add(PROJECTIVE_POINT R, PROJECTIVE_POINT P, /*const mpz_t a,*/ const
 	mpz_init(B);
 	mpz_init(C);
 	mpz_init(D);
-	//mpz_init(E);
+	mpz_init(E);
 	mpz_init(F);
 	mpz_init(H);
 	mpz_init(J);
@@ -60,6 +61,7 @@ void double_add(PROJECTIVE_POINT R, PROJECTIVE_POINT P, /*const mpz_t a,*/ const
 	mpz_mod(C,C,N);
 	mpz_pow_ui(D,tP->Y,2); //D = Y1^2 
 	mpz_mod(D,D,N);
+	mpz_mul_ui(E,C,-1); //E=-C
 	mpz_add(F,C,D); //F = E+D
 	mpz_pow_ui(H,tP->Z,2); //H = Z1^2
 	mpz_mod(H,H,N);
@@ -72,9 +74,8 @@ void double_add(PROJECTIVE_POINT R, PROJECTIVE_POINT P, /*const mpz_t a,*/ const
 	mpz_mul(R->X,R->X,J); //X3
 	mpz_mod(R->X,R->X,N);
 	
-
 	/*Y3の計算*/
-	mpz_sub(R->Y,C,D); //Y3 = E-D
+	mpz_sub(R->Y,E,D); //Y3 = E-D
 	mpz_mul(R->Y,R->Y,F); //Y3
 	mpz_mod(R->Y,R->Y,N);
 
@@ -85,7 +86,7 @@ void double_add(PROJECTIVE_POINT R, PROJECTIVE_POINT P, /*const mpz_t a,*/ const
 	mpz_clear(B);
 	mpz_clear(C);
 	mpz_clear(D);
-	//mpz_clear(E);
+	mpz_clear(E);
 	mpz_clear(F);
 	mpz_clear(H);
 	mpz_clear(J);

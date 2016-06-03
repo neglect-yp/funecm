@@ -62,7 +62,7 @@ void double_add(PROJECTIVE_POINT R, PROJECTIVE_POINT P, /*const mpz_t a,*/ const
 	mpz_pow_ui(D,tP->Y,2); //D = Y1^2 
 	mpz_mod(D,D,N);
 	mpz_mul_ui(E,C,-1); //E=-C
-	mpz_add(F,C,D); //F = E+D
+	mpz_add(F,E,D); //F = E+D
 	mpz_pow_ui(H,tP->Z,2); //H = Z1^2
 	mpz_mod(H,H,N);
 	mpz_sub(J,F,H); //J = F-H

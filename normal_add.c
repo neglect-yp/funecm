@@ -109,6 +109,9 @@ void normal_add(PROJECTIVE_POINT R, PROJECTIVE_POINT P, PROJECTIVE_POINT Q, cons
  * mixed addition アルゴリズムを用いることができる。
  */
 void extended_normal_add(EXTENDED_POINT R, const EXTENDED_POINT P, const EXTENDED_POINT Q, const mpz_t N) {
+	if (mpz_cmp_ui(Q->Z, 1) != 0) {
+		printf("Z2 is not 0!!!!\n");
+	}
 	mpz_t A, B, C, D, E, F, G, H, tmp;
 	
 	/*初期化*/

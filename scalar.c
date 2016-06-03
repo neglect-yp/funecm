@@ -50,12 +50,17 @@ void scalar(PROJECTIVE_POINT R, PROJECTIVE_POINT P, const unsigned long int k, c
 {
 	PROJECTIVE_POINT tP;
 	PROJECTIVE_POINT tmp;
+	EXTENDED_POINT eP;
+	EXTENDED_POINT doubled;
 
 	projective_point_init(tP);
 	projective_point_init(tmp);
+	extended_point_init(eP);
+	extended_point_init(doubled);
 
 	projective_point_set(tP, P);
 	projective_point_set(tmp, P);
+	protoext(eP, P, N);
 
 	unsigned long int m = count_bit(k);
 	char *bit = (char *)malloc(m);
@@ -71,7 +76,9 @@ void scalar(PROJECTIVE_POINT R, PROJECTIVE_POINT P, const unsigned long int k, c
 		i--;
 		double_add(tP, tP, N);
 		if (bit[i] == 1) {
-			normal_add(tP, tP, tmp, D, N);
+			protoext(doubled, tP, N);
+			extended_normal_add(doubled, doubled, eP, D, N);
+			exttopro(tP, doubled, N);
 		}
 	}
 
@@ -82,4 +89,6 @@ void scalar(PROJECTIVE_POINT R, PROJECTIVE_POINT P, const unsigned long int k, c
 	/* メモリーの解放 */
 	projective_point_clear(tP);
 	projective_point_clear(tmp);
+	extended_point_clear(eP);
+	extended_point_clear(doubled);
 }

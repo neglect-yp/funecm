@@ -37,8 +37,10 @@ void ecm(mpz_t f, const mpz_t N,  const mpz_t Y, const unsigned long int k, FILE
 	/*一時変数*/
 	mpz_t tmp;
 	mpz_t tmp2;
+	mpz_t inv;
 	mpz_init(tmp);
 	mpz_init(tmp2);
+	mpz_init(inv);
 
 	/* Pの初期化 */
 	affine_point_init(aP);
@@ -56,7 +58,7 @@ void ecm(mpz_t f, const mpz_t N,  const mpz_t Y, const unsigned long int k, FILE
 	mpz_mod(tmp,tmp,N);
 	mpz_pow_ui(tmp2,aP->y,2); //tmp2 = y^2
 	mpz_mod(tmp2,tmp2,N);
-	mpz_add(d,tmp,tmp2); //d = x^2+y^2
+	mpz_sub(d,tmp2,tmp); //d = y^2-x^2
 	mpz_sub_ui(d,d,1); //d = x^2+y^2-1
 	mpz_mul(tmp,tmp,tmp2); //tmp = x^2y^2
 	mpz_mod(tmp,tmp,N);
@@ -78,6 +80,12 @@ void ecm(mpz_t f, const mpz_t N,  const mpz_t Y, const unsigned long int k, FILE
 		/* e = log p kを決める */
 		e = (int)(log(k) / log(p));
 		for (i = 1; i <= e; i++) {
+			mpz_invert(inv, pP->Z, N);
+			mpz_mul(pP->X, pP->X, inv);
+			mpz_mod(pP->X, pP->X, N);
+			mpz_mul(pP->Y, pP->Y, inv);
+			mpz_mod(pP->Y, pP->Y, N);
+			mpz_set_ui(pP->Z, 1);
 			scalar(pP, pP, p, d, N);
 			mpz_gcd(f, pP->X, N);
 			//gmp_printf("gcd(%Zd, %Zd) = %Zd\n", pP->Z, N, f);
@@ -98,5 +106,6 @@ FOUND:
 	mpz_clear(d);
 	mpz_clear(tmp);
 	mpz_clear(tmp2);
+	mpz_clear(inv);
 	mpz_clear(prime);
 }

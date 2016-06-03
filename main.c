@@ -20,7 +20,8 @@
 #include <omp.h>
 #include "point.h"
 
-#define Y_LOOP 12000
+#define LOOP 12000
+#define MAX_RAND 0xffffffffffffffff
 
 /* !	適当です	!
  * 素因数が見つからなかった    : 0
@@ -106,7 +107,7 @@ int main (int argc, char *argv[])
 	
 	double total_start;
 	double total_end;
-	unsigned long int Y;
+	int i;
 	int found;
 	
 	do{
@@ -117,16 +118,33 @@ int main (int argc, char *argv[])
 		
 		found = 0;
 		total_start = omp_get_wtime();
-		//int n = 1;
-		int n = omp_get_max_threads();
+		int n = 240;
+		//int n = omp_get_max_threads();
 		fprintf(fp,"threads = %d\n", n);
 		//#pragma omp parallel num_threads(n) shared(found)
 		#pragma omp parallel num_threads(n) shared(found)
 		{
 			//#pragma omp for private(factor)
 			#pragma omp for
-			for (Y = 2; Y < Y_LOOP; Y++) {
-				printf("Y=%d\n",Y);
+			for (i = 0; i < LOOP; i++) {
+				mpz_t Y;
+				mpz_init(Y);
+				gmp_randstate_t state;
+				gmp_randinit_default(state);
+				gmp_randseed_ui(state, (unsigned long int)time(NULL)+i);
+				
+				/* Yを2~RANDMAXまでの乱数で決定する。 */
+				mpz_t randmax;
+				mpz_init(randmax);
+				if (mpz_cmp_ui(N, MAX_RAND) < 0)
+					mpz_set(randmax, N);
+				else
+					mpz_set_ui(randmax, MAX_RAND);
+				mpz_urandomm(Y, state, randmax);
+				while (mpz_cmp_ui(Y, 2) < 0)
+					mpz_add_ui(Y, Y, 1);
+				gmp_printf("Y=%Zd\n",Y);
+
 				mpz_t factor;
 				mpz_init(factor);
 				mpz_t cofactor;
@@ -141,13 +159,14 @@ int main (int argc, char *argv[])
 					/* 因数が1又はNだった場合係数を変えてやり直す */
 					if (mpz_cmp_ui(factor, 1) == 0 || mpz_cmp(factor, N) == 0) {
 						A_end = omp_get_wtime();
-						fprintf(fp,"stage1 time: %.3lf seconds\nY=%d\nfactor not found\n--------------------------------------------------\n", (A_end - A_start),Y);
+						gmp_fprintf(fp,"stage1 time: %.3lf seconds\nY=%Zd\nfactor not found\n--------------------------------------------------\n", (A_end - A_start),Y);
 						
 						/*
 						printf("stage1 time: %.3lf seconds\n", (A_end - A_start));
 						printf("factor not found\n");
 						printf("--------------------------------------------------\n");
 						*/
+						mpz_clear(Y);
 						mpz_clear(factor);
 						mpz_clear(cofactor);
 						continue;
@@ -191,6 +210,7 @@ int main (int argc, char *argv[])
 						
 					}
 				}
+				mpz_clear(Y);
 				mpz_clear(factor);
 				mpz_clear(cofactor);
 			}

@@ -26,7 +26,7 @@
  * const unsigned long int Y  :ベースポイントPのY座標
  * const unsigned long int k  :スカラー倍
  */
-void ecm(mpz_t f, const mpz_t N,  const unsigned long int Y, const unsigned long int k, FILE *fp)
+void ecm(mpz_t f, const mpz_t N,  const mpz_t Y, const unsigned long int k, FILE *fp)
 {
 	/* 使用変数・構造体の宣言 */
 	AFFINE_POINT aP;
@@ -47,7 +47,7 @@ void ecm(mpz_t f, const mpz_t N,  const unsigned long int Y, const unsigned long
 
 	/* Pの点の座標を指定 */
 	mpz_set_ui(aP->x, 2);
-	mpz_set_ui(aP->y, Y);
+	mpz_set(aP->y, Y);
 
 	/* dの決定 */
 	mpz_t d;

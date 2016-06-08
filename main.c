@@ -21,7 +21,6 @@
 #include "point.h"
 
 #define LOOP 12000
-#define MAX_RAND 0xffffffffffffffff
 
 /* !	適当です	!
  * 素因数が見つからなかった    : 0
@@ -133,14 +132,7 @@ int main (int argc, char *argv[])
 				gmp_randinit_default(state);
 				gmp_randseed_ui(state, (unsigned long int)time(NULL)+i);
 				
-				/* Yを2~RANDMAXまでの乱数で決定する。 */
-				mpz_t randmax;
-				mpz_init(randmax);
-				if (mpz_cmp_ui(N, MAX_RAND) < 0)
-					mpz_set(randmax, N);
-				else
-					mpz_set_ui(randmax, MAX_RAND);
-				mpz_urandomm(Y, state, randmax);
+				mpz_urandomm(Y, state, N);
 				while (mpz_cmp_ui(Y, 2) < 0)
 					mpz_add_ui(Y, Y, 1);
 				gmp_printf("Y=%Zd\n",Y);

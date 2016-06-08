@@ -62,6 +62,7 @@ void protoext(EXTENDED_POINT R, const PROJECTIVE_POINT P, const mpz_t N)
 	mpz_invert(inv, P->Z, N);
 	
 	mpz_mul(R->T, P->X, P->Y);
+	mpz_mod(R->T, R->T, N);
 	mpz_mul(R->T, R->T, inv);
 	mpz_mod(R->T, R->T, N);
 

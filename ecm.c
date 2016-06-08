@@ -59,7 +59,7 @@ void ecm(mpz_t f, const mpz_t N,  const mpz_t Y, const unsigned long int k, FILE
 	mpz_pow_ui(tmp2,aP->y,2); //tmp2 = y^2
 	mpz_mod(tmp2,tmp2,N);
 	mpz_sub(d,tmp2,tmp); //d = y^2-x^2
-	mpz_sub_ui(d,d,1); //d = x^2+y^2-1
+	mpz_sub_ui(d,d,1); //d = y^2-x^2-1
 	mpz_mul(tmp,tmp,tmp2); //tmp = x^2y^2
 	mpz_mod(tmp,tmp,N);
 	mpz_invert(tmp,tmp,N);

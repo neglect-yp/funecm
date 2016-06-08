@@ -64,7 +64,7 @@ void normal_add(PROJECTIVE_POINT R, PROJECTIVE_POINT P, PROJECTIVE_POINT Q, cons
 	mpz_mul(E,E,d); //E = dCD
 	mpz_mod(E,E,N);
 	mpz_sub(F,B,E); //F = B-E
-	mpz_add(G,B,E); //F = B+E
+	mpz_add(G,B,E); //G = B+E
 	mpz_add(H,tP->X,tP->Y); //H =X1+Y1
 	mpz_add(I,tQ->X,tQ->Y); //I =X2+Y2
 

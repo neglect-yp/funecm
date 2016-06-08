@@ -76,9 +76,10 @@ void scalar(PROJECTIVE_POINT R, PROJECTIVE_POINT P, const unsigned long int k, c
 		i--;
 		double_add(tP, tP, N);
 		if (bit[i] == 1) {
-			protoext(doubled, tP, N);
-			extended_normal_add(doubled, doubled, eP, D, N);
-			exttopro(tP, doubled, N);
+			//protoext(doubled, tP, N);
+			//extended_normal_add(doubled, doubled, eP, D, N);
+			//exttopro(tP, doubled, N);
+			normal_add(tP, tP, tmp, D, N);
 		}
 	}
 

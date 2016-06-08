@@ -80,14 +80,16 @@ void ecm(mpz_t f, const mpz_t N,  const mpz_t Y, const unsigned long int k, FILE
 		/* e = log p kを決める */
 		e = (int)(log(k) / log(p));
 		for (i = 1; i <= e; i++) {
-			mpz_gcd(f, pP->X, N);
+			/*
 			mpz_invert(inv, pP->Z, N);
 			mpz_mul(pP->X, pP->X, inv);
 			mpz_mod(pP->X, pP->X, N);
 			mpz_mul(pP->Y, pP->Y, inv);
 			mpz_mod(pP->Y, pP->Y, N);
 			mpz_set_ui(pP->Z, 1);
+			*/
 			scalar(pP, pP, p, d, N);
+			mpz_gcd(f, pP->X, N);
 			//gmp_printf("gcd(%Zd, %Zd) = %Zd\n", pP->Z, N, f);
 			if ( mpz_cmp_ui(f,1) != 0) {
 				goto FOUND;

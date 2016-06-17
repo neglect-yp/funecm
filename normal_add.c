@@ -18,18 +18,10 @@
  */
 
 void extended_dedicated_add(EXTENDED_POINT R, EXTENDED_POINT P, EXTENDED_POINT Q, const mpz_t N) {
-	mpz_t A, B, C, D, E, F, G, H, tmp;
+	mpz_t A,B,C,D,E,F,G,H,tmp;
 	
 	/*初期化*/
-	mpz_init(A);
-	mpz_init(B);
-	mpz_init(C);
-	mpz_init(D);
-	mpz_init(E);
-	mpz_init(F);
-	mpz_init(G);
-	mpz_init(H);
-	mpz_init(tmp);
+	mpz_inits(A,B,C,D,E,F,G,H,tmp);
 	
 	/* A<-(Y1-X1)*(Y2+X2) */
 	mpz_sub(A, P->Y, P->X);
@@ -85,14 +77,5 @@ void extended_dedicated_add(EXTENDED_POINT R, EXTENDED_POINT P, EXTENDED_POINT Q
 	mpz_mul(R->Z, F, G);
 	mpz_mod(R->Z, R->Z, N);
 
-	mpz_clear(A);
-	mpz_clear(B);
-	mpz_clear(C);
-	mpz_clear(D);
-	mpz_clear(E);
-	mpz_clear(F);
-	mpz_clear(G);
-	mpz_clear(H);
-	mpz_clear(tmp);
-
+	mpz_clears(A,B,C,D,E,F,G,H,tmp);
 }

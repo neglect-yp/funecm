@@ -26,29 +26,14 @@
  * Projective座標系の2倍算を行う
  * PROJECTIVE_POINT R :Pの2倍算の結果を格納する点
  * PROJECTIVE_POINT P :2倍算を行う点
- * const mpz_t a            :楕円曲線の係数
  * const mpz_t N            :mod N
  */
-void double_add(PROJECTIVE_POINT R, PROJECTIVE_POINT P, /*const mpz_t a,*/ const mpz_t N)
+void double_add(PROJECTIVE_POINT R, PROJECTIVE_POINT P, const mpz_t N)
 {
-	mpz_t B;
-	mpz_t C;
-	mpz_t D;
-	mpz_t E;
-	mpz_t F;
-	mpz_t H;
-	mpz_t J;
-
-	//PROJECTIVE_POINT tP; //Pの座標を格納する
+	mpz_t B,C,D,E,F,H,J;
 
 	/* 初期化 */
-	mpz_init(B);
-	mpz_init(C);
-	mpz_init(D);
-	mpz_init(E);
-	mpz_init(F);
-	mpz_init(H);
-	mpz_init(J);
+	mpz_inits(B,C,D,E,F,H,J);
 
 	mpz_add(B,P->X,P->Y); //B = X1+Y1
 	mpz_pow_ui(B,B,2); //B = (X1+Y1)^2
@@ -79,27 +64,14 @@ void double_add(PROJECTIVE_POINT R, PROJECTIVE_POINT P, /*const mpz_t a,*/ const
 	mpz_mul(R->Z,F,J); //Z3
 	mpz_mod(R->Z,R->Z,N);
 
-	mpz_clear(B);
-	mpz_clear(C);
-	mpz_clear(D);
-	mpz_clear(E);
-	mpz_clear(F);
-	mpz_clear(H);
-	mpz_clear(J);
+	mpz_clears(B,C,D,E,F,H,J);
 }
 
 void dedicated_doubling(EXTENDED_POINT R, const EXTENDED_POINT P, const mpz_t N){
 	
 	mpz_t A,B,C,D,E,G,F,H;
 
-	mpz_init(A);
-	mpz_init(B);
-	mpz_init(C);
-	mpz_init(D);
-	mpz_init(E);
-	mpz_init(G);
-	mpz_init(F);
-	mpz_init(H);
+	mpz_inits(A,B,C,D,E,G,F,H);
 
 	mpz_pow_ui(A, P->X, 2);
 	mpz_mod(A, A, N);
@@ -138,12 +110,5 @@ void dedicated_doubling(EXTENDED_POINT R, const EXTENDED_POINT P, const mpz_t N)
 	mpz_mul(R->Z, F, G);
 	mpz_mod(R->Z, R->Z, N);
 
-	mpz_clear(A);
-	mpz_clear(B);
-	mpz_clear(C);
-	mpz_clear(D);
-	mpz_clear(E);
-	mpz_clear(G);
-	mpz_clear(F);
-	mpz_clear(H);
+	mpz_clears(A,B,C,D,E,G,F,H);
 }

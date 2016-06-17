@@ -64,6 +64,34 @@ void scalar(PROJECTIVE_POINT R, PROJECTIVE_POINT P, const unsigned long int k, c
 		bit[i] = (k >> i) & 1;
 	}
 
+	/* 移動窓法のための事前計算 */	
+	EXTENDED_POINT *Parray = (EXTENDED_POINT *)malloc(65536*sizeof(EXTENDED_POINT));
+	extended_point_init(Parray[1]);
+	extended_point_set(Parray[1], eP);
+	extended_point_init(Parray[2]);
+	dedicated_doubling(Parray[2], eP, N);
+	mpz_t inv;
+	mpz_invert(inv, Parray[2]->Z, N);
+	mpz_mul(Parray[2]->X, Parray[2]->X, inv);
+	mpz_mod(Parray[2]->X, Parray[2]->X, N);
+	mpz_mul(Parray[2]->Y, Parray[2]->Y, inv);
+	mpz_mod(Parray[2]->Y, Parray[2]->Y, N);
+	mpz_mul(Parray[2]->T, Parray[2]->T, inv);
+	mpz_mod(Parray[2]->T, Parray[2]->T, N);
+	mpz_set_ui(Parray[2]->Z, 1);
+	for (i = 1; i <= 32767; i++) {
+		extended_point_init(Parray[2*i+1]);
+		extended_dedicated_add(Parray[2*i+1],Parray[2*i-1],Parray[2]);
+		mpz_mul(Parray[2*i+1]->X, Parray[2*i+1]->X, inv);
+		mpz_mod(Parray[2*i+1]->X, Parray[2*i+1]->X, N);
+		mpz_mul(Parray[2*i+1]->Y, Parray[2*i+1]->Y, inv);
+		mpz_mod(Parray[2*i+1]->Y, Parray[2*i+1]->Y, N);
+		mpz_mul(Parray[2*i+1]->T, Parray[2*i+1]->T, inv);
+		mpz_mod(Parray[2*i+1]->T, Parray[2*i+1]->T, N);
+		mpz_set_ui(Parray[2*i+1]->Z, 1);
+	}
+	mpz_clear(inv);
+
 	i = m - 1;
 	/* バイナリー法で計算を行う */
 	while (i > 0) {
@@ -75,6 +103,7 @@ void scalar(PROJECTIVE_POINT R, PROJECTIVE_POINT P, const unsigned long int k, c
 	}
 
 	free(bit);
+	free(Parray);
 
 	exttopro(R, tP, N);
 

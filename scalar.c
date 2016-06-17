@@ -103,11 +103,15 @@ void scalar(PROJECTIVE_POINT R, PROJECTIVE_POINT P, const unsigned long int k, c
 	}
 
 	free(bit);
-	free(Parray);
 
 	exttopro(R, tP, N);
 
 	/* メモリーの解放 */
 	extended_point_clear(tP);
 	extended_point_clear(eP);
+	extended_point_clear(Parray[1]);
+	extended_point_clear(Parray[2]);
+	for (i = 1; i <= 32767; i++)
+		extended_point_clear(Parray[2*i+1]);
+	free(Parray);
 }

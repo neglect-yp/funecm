@@ -48,19 +48,13 @@ static unsigned long int count_bit(unsigned long int n)
  * */
 void scalar(PROJECTIVE_POINT R, PROJECTIVE_POINT P, const unsigned long int k, const mpz_t D, const mpz_t N)
 {
-	PROJECTIVE_POINT tP;
-	PROJECTIVE_POINT tmp;
+	EXTENDED_POINT tP;
+	extended_point_init(tP);
+	protoext(tP, P, N);
+
 	EXTENDED_POINT eP;
-	EXTENDED_POINT doubled;
-
-	projective_point_init(tP);
-	projective_point_init(tmp);
 	extended_point_init(eP);
-	extended_point_init(doubled);
-
-	projective_point_set(tP, P);
-	projective_point_set(tmp, P);
-	protoext(eP, P, N);
+	extended_point_set(eP, tP);
 
 	unsigned long int m = count_bit(k);
 	char *bit = (char *)malloc(m);
@@ -74,22 +68,17 @@ void scalar(PROJECTIVE_POINT R, PROJECTIVE_POINT P, const unsigned long int k, c
 	/* バイナリー法で計算を行う */
 	while (i > 0) {
 		i--;
-		double_add(tP, tP, N);
+		dedicated_doubling(tP, tP, N);
 		if (bit[i] == 1) {
-			//protoext(doubled, tP, N);
-			//extended_normal_add(doubled, doubled, eP, D, N);
-			//exttopro(tP, doubled, N);
-			normal_add(tP, tP, tmp, D, N);
+			extended_dedicated_add(tP, tP, eP, N);
 		}
 	}
 
 	free(bit);
 
-	projective_point_set(R, tP);
+	exttopro(R, tP, N);
 
 	/* メモリーの解放 */
-	projective_point_clear(tP);
-	projective_point_clear(tmp);
+	extended_point_clear(tP);
 	extended_point_clear(eP);
-	extended_point_clear(doubled);
 }

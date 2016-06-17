@@ -26,15 +26,14 @@
  * const unsigned long int Y  :ベースポイントPのY座標
  * const unsigned long int k  :スカラー倍
  */
-void ecm(mpz_t f, const mpz_t N,  const mpz_t Y, const unsigned long int k, FILE *fp)
+void ecm(mpz_t f, const mpz_t N, const mpz_t Y, const unsigned long int k, FILE *fp)
 {
 	/* 使用変数・構造体の宣言 */
-	AFFINE_POINT aP;
-	PROJECTIVE_POINT pP;
+	PROJECTIVE_POINT P;
 	int e;
 	int i;
 
-	/*一時変数*/
+	/* 一時変数 */
 	mpz_t tmp;
 	mpz_t tmp2;
 	mpz_t inv;
@@ -43,20 +42,19 @@ void ecm(mpz_t f, const mpz_t N,  const mpz_t Y, const unsigned long int k, FILE
 	mpz_init(inv);
 
 	/* Pの初期化 */
-	affine_point_init(aP);
-	projective_point_init(pP);
-
+	projective_point_init(P);
 
 	/* Pの点の座標を指定 */
-	mpz_set_ui(aP->x, 2);
-	mpz_set(aP->y, Y);
+	mpz_set_ui(P->X, 2);
+	mpz_set(P->Y, Y);
+	mpz_set_ui(P->Z, 1);
 
 	/* dの決定 */
 	mpz_t d;
 	mpz_init(d);
-	mpz_pow_ui(tmp,aP->x,2); //tmp = x^2
+	mpz_pow_ui(tmp,P->X,2); //tmp = x^2
 	mpz_mod(tmp,tmp,N);
-	mpz_pow_ui(tmp2,aP->y,2); //tmp2 = y^2
+	mpz_pow_ui(tmp2,P->Y,2); //tmp2 = y^2
 	mpz_mod(tmp2,tmp2,N);
 	mpz_sub(d,tmp2,tmp); //d = y^2-x^2
 	mpz_sub_ui(d,d,1); //d = y^2-x^2-1
@@ -72,26 +70,23 @@ void ecm(mpz_t f, const mpz_t N,  const mpz_t Y, const unsigned long int k, FILE
 	mpz_init(prime);
 	mpz_set_ui(prime, p);
 
-	/* Affine -> Projective 変換 */
-	afftopro(pP, aP, N);
-
 	/* 内部計算 */
 	while (p <= k) {
 		/* e = log p kを決める */
 		e = (int)(log(k) / log(p));
 		for (i = 1; i <= e; i++) {
-			/*
-			mpz_invert(inv, pP->Z, N);
-			mpz_mul(pP->X, pP->X, inv);
-			mpz_mod(pP->X, pP->X, N);
-			mpz_mul(pP->Y, pP->Y, inv);
-			mpz_mod(pP->Y, pP->Y, N);
-			mpz_set_ui(pP->Z, 1);
-			*/
-			scalar(pP, pP, p, d, N);
-			mpz_gcd(f, pP->X, N);
+			/* Zを1にするための処理 */
+			mpz_invert(inv, P->Z, N);
+			mpz_mul(P->X, P->X, inv);
+			mpz_mod(P->X, P->X, N);
+			mpz_mul(P->Y, P->Y, inv);
+			mpz_mod(P->Y, P->Y, N);
+			mpz_set_ui(P->Z, 1);
+
+			scalar(P, P, p, d, N);
+			mpz_gcd(f, P->X, N);
 			//gmp_printf("gcd(%Zd, %Zd) = %Zd\n", pP->Z, N, f);
-			if ( mpz_cmp_ui(f,1) != 0) {
+			if (mpz_cmp_ui(f,1) != 0) {
 				goto FOUND;
 			}
 		}
@@ -103,8 +98,7 @@ FOUND:
 	gmp_fprintf(fp,"Stage1: d = %Zd\n", d);
 
 	/* 使用変数・関数の開放 */
-	affine_point_clear(aP);
-	projective_point_clear(pP);
+	projective_point_clear(P);
 	mpz_clear(d);
 	mpz_clear(tmp);
 	mpz_clear(tmp2);

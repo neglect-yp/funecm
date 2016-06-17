@@ -52,21 +52,15 @@ void protoaff(AFFINE_POINT R, const PROJECTIVE_POINT P, const mpz_t N)
 
 void protoext(EXTENDED_POINT R, const PROJECTIVE_POINT P, const mpz_t N)
 {
-	mpz_set(R->X, P->X);
-	mpz_set(R->Y, P->Y);
-	mpz_set(R->Z, P->Z);
-
-	mpz_t inv;
-	mpz_init(inv);
-
-	mpz_invert(inv, P->Z, N);
-	
+	/* (X:Y:Z) -> (XZ:YZ:XY:Z^2) */
+	mpz_mul(R->X, P->X, P->Z);
+	mpz_mod(R->X, R->X, N);
+	mpz_mul(R->Y, P->Y, P->Z);
+	mpz_mod(R->Y, R->Y, N);
 	mpz_mul(R->T, P->X, P->Y);
 	mpz_mod(R->T, R->T, N);
-	mpz_mul(R->T, R->T, inv);
-	mpz_mod(R->T, R->T, N);
-
-	mpz_clear(inv);
+	mpz_pow_ui(R->Z, P->Z, 2);
+	mpz_mod(R->Z, R->Z, N);
 }
 
 void exttopro(PROJECTIVE_POINT R, const EXTENDED_POINT P, const mpz_t N)

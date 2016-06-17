@@ -126,12 +126,12 @@ int main (int argc, char *argv[])
 			//#pragma omp for private(factor)
 			#pragma omp for
 			for (i = 0; i < LOOP; i++) {
+				/* Yを乱数で生成する */
 				mpz_t Y;
 				mpz_init(Y);
 				gmp_randstate_t state;
 				gmp_randinit_default(state);
 				gmp_randseed_ui(state, (unsigned long int)time(NULL)+i);
-				
 				mpz_urandomm(Y, state, N);
 				while (mpz_cmp_ui(Y, 2) < 0)
 					mpz_add_ui(Y, Y, 1);

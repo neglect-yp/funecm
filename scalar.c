@@ -79,7 +79,7 @@ void scalar(PROJECTIVE_POINT R, PROJECTIVE_POINT P, const unsigned long int k, c
 	mpz_mul(Parray[2]->T, Parray[2]->T, inv);
 	mpz_mod(Parray[2]->T, Parray[2]->T, N);
 	mpz_set_ui(Parray[2]->Z, 1);
-	for (i = 1; i <= 15; i++) {
+	for (i = 1; i <= 7; i++) {
 		extended_point_init(Parray[2*i+1]);
 		extended_dedicated_add(Parray[2*i+1],Parray[2*i-1],Parray[2]);
 		mpz_mul(Parray[2*i+1]->X, Parray[2*i+1]->X, inv);
@@ -94,11 +94,32 @@ void scalar(PROJECTIVE_POINT R, PROJECTIVE_POINT P, const unsigned long int k, c
 
 	i = m - 1;
 	/* バイナリー法で計算を行う */
+	/*
 	while (i > 0) {
 		i--;
 		dedicated_doubling(tP, tP, N);
 		if (bit[i] == 1) {
 			extended_dedicated_add(tP, tP, eP, N);
+		}
+	}
+	*/
+	while (i) {
+		if (!bit[i]) {
+			dedicated_doubling(tP, tP, N);
+			i--;
+		} else {
+			int t = i-3 > 0 ? i-3 : 0;
+			while (!bit[t])
+				t++;
+			int h = 0;
+			while (i >= t) {
+				h *= 2;
+				if (bit[i])
+					h++;
+				dedicated_doubling(tP, tP, N);
+				i--;
+			}
+			extended_dedicated_add(tP, tP, Parray[h], N);
 		}
 	}
 
@@ -111,7 +132,7 @@ void scalar(PROJECTIVE_POINT R, PROJECTIVE_POINT P, const unsigned long int k, c
 	extended_point_clear(eP);
 	extended_point_clear(Parray[1]);
 	extended_point_clear(Parray[2]);
-	for (i = 1; i <= 15; i++)
+	for (i = 1; i <= 7; i++)
 		extended_point_clear(Parray[2*i+1]);
 	free(Parray);
 }

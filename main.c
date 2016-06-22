@@ -20,7 +20,7 @@
 #include <omp.h>
 #include "point.h"
 
-#define LOOP 12000
+#define LOOP 4800
 
 /* !	適当です	!
  * 素因数が見つからなかった    : 0

@@ -65,7 +65,7 @@ void scalar(PROJECTIVE_POINT R, PROJECTIVE_POINT P, const unsigned long int k, c
 	}
 
 	/* 移動窓法のための事前計算 */	
-	EXTENDED_POINT *Parray = (EXTENDED_POINT *)malloc(65536*sizeof(EXTENDED_POINT));
+	EXTENDED_POINT *Parray = (EXTENDED_POINT *)malloc(16*sizeof(EXTENDED_POINT));
 	extended_point_init(Parray[1]);
 	extended_point_set(Parray[1], eP);
 	extended_point_init(Parray[2]);
@@ -79,7 +79,7 @@ void scalar(PROJECTIVE_POINT R, PROJECTIVE_POINT P, const unsigned long int k, c
 	mpz_mul(Parray[2]->T, Parray[2]->T, inv);
 	mpz_mod(Parray[2]->T, Parray[2]->T, N);
 	mpz_set_ui(Parray[2]->Z, 1);
-	for (i = 1; i <= 32767; i++) {
+	for (i = 1; i <= 15; i++) {
 		extended_point_init(Parray[2*i+1]);
 		extended_dedicated_add(Parray[2*i+1],Parray[2*i-1],Parray[2]);
 		mpz_mul(Parray[2*i+1]->X, Parray[2*i+1]->X, inv);
@@ -111,7 +111,7 @@ void scalar(PROJECTIVE_POINT R, PROJECTIVE_POINT P, const unsigned long int k, c
 	extended_point_clear(eP);
 	extended_point_clear(Parray[1]);
 	extended_point_clear(Parray[2]);
-	for (i = 1; i <= 32767; i++)
+	for (i = 1; i <= 15; i++)
 		extended_point_clear(Parray[2*i+1]);
 	free(Parray);
 }

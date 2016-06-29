@@ -120,10 +120,8 @@ int main (int argc, char *argv[])
 		int n = 240;
 		//int n = omp_get_max_threads();
 		fprintf(fp,"threads = %d\n", n);
-		//#pragma omp parallel num_threads(n) shared(found)
 		#pragma omp parallel num_threads(n) shared(found)
 		{
-			//#pragma omp for private(factor)
 			#pragma omp for
 			for (i = 0; i < LOOP; i++) {
 				/* Yを乱数で生成する */

@@ -71,6 +71,7 @@ void scalar(PROJECTIVE_POINT R, PROJECTIVE_POINT P, const unsigned long int k, c
 	extended_point_init(Parray[2]);
 	dedicated_doubling(Parray[2], eP, N);
 	mpz_t inv;
+	mpz_init(inv);
 	mpz_invert(inv, Parray[2]->Z, N);
 	mpz_mul(Parray[2]->X, Parray[2]->X, inv);
 	mpz_mod(Parray[2]->X, Parray[2]->X, N);
@@ -81,7 +82,8 @@ void scalar(PROJECTIVE_POINT R, PROJECTIVE_POINT P, const unsigned long int k, c
 	mpz_set_ui(Parray[2]->Z, 1);
 	for (i = 1; i <= 7; i++) {
 		extended_point_init(Parray[2*i+1]);
-		extended_dedicated_add(Parray[2*i+1],Parray[2*i-1],Parray[2]);
+		extended_dedicated_add(Parray[2*i+1],Parray[2*i-1],Parray[2],N);
+		mpz_invert(inv, Parray[2*i+1]->Z, N);
 		mpz_mul(Parray[2*i+1]->X, Parray[2*i+1]->X, inv);
 		mpz_mod(Parray[2*i+1]->X, Parray[2*i+1]->X, N);
 		mpz_mul(Parray[2*i+1]->Y, Parray[2*i+1]->Y, inv);
@@ -103,7 +105,7 @@ void scalar(PROJECTIVE_POINT R, PROJECTIVE_POINT P, const unsigned long int k, c
 		}
 	}
 	*/
-	while (i) {
+	while (i > 0) {
 		if (!bit[i]) {
 			dedicated_doubling(tP, tP, N);
 			i--;

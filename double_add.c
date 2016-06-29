@@ -19,6 +19,7 @@
  * 2016/03/23 mul処理の下にmod処理を追加
  * 2016/05/27 a=-1に変更
  */
+#include <stdio.h>
 #include "gmp.h"
 #include "point.h"
 
@@ -33,7 +34,7 @@ void double_add(PROJECTIVE_POINT R, PROJECTIVE_POINT P, const mpz_t N)
 	mpz_t B,C,D,E,F,H,J;
 
 	/* 初期化 */
-	mpz_inits(B,C,D,E,F,H,J);
+	mpz_inits(B,C,D,E,F,H,J,NULL);
 
 	mpz_add(B,P->X,P->Y); //B = X1+Y1
 	mpz_pow_ui(B,B,2); //B = (X1+Y1)^2
@@ -64,14 +65,14 @@ void double_add(PROJECTIVE_POINT R, PROJECTIVE_POINT P, const mpz_t N)
 	mpz_mul(R->Z,F,J); //Z3
 	mpz_mod(R->Z,R->Z,N);
 
-	mpz_clears(B,C,D,E,F,H,J);
+	mpz_clears(B,C,D,E,F,H,J,NULL);
 }
 
 void dedicated_doubling(EXTENDED_POINT R, const EXTENDED_POINT P, const mpz_t N){
 	
 	mpz_t A,B,C,D,E,G,F,H;
 
-	mpz_inits(A,B,C,D,E,G,F,H);
+	mpz_inits(A,B,C,D,E,G,F,H,NULL);
 
 	mpz_pow_ui(A, P->X, 2);
 	mpz_mod(A, A, N);
@@ -110,5 +111,5 @@ void dedicated_doubling(EXTENDED_POINT R, const EXTENDED_POINT P, const mpz_t N)
 	mpz_mul(R->Z, F, G);
 	mpz_mod(R->Z, R->Z, N);
 
-	mpz_clears(A,B,C,D,E,G,F,H);
+	mpz_clears(A,B,C,D,E,G,F,H,NULL);
 }

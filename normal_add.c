@@ -7,7 +7,7 @@
  * 2015/10/** 前年度より計算式を変更
  * 2016/05/27 a=-1に変更 Extended Twisted Edwards Coodinatesに対応
  */
-
+#include <stdio.h>
 #include "gmp.h"
 #include "point.h"
 
@@ -21,7 +21,7 @@ void extended_dedicated_add(EXTENDED_POINT R, EXTENDED_POINT P, EXTENDED_POINT Q
 	mpz_t A,B,C,D,E,F,G,H,tmp;
 	
 	/*初期化*/
-	mpz_inits(A,B,C,D,E,F,G,H,tmp);
+	mpz_inits(A,B,C,D,E,F,G,H,tmp,NULL);
 	
 	/* A<-(Y1-X1)*(Y2+X2) */
 	mpz_sub(A, P->Y, P->X);
@@ -77,5 +77,5 @@ void extended_dedicated_add(EXTENDED_POINT R, EXTENDED_POINT P, EXTENDED_POINT Q
 	mpz_mul(R->Z, F, G);
 	mpz_mod(R->Z, R->Z, N);
 
-	mpz_clears(A,B,C,D,E,F,G,H,tmp);
+	mpz_clears(A,B,C,D,E,F,G,H,tmp,NULL);
 }

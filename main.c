@@ -20,7 +20,7 @@
 #include <omp.h>
 #include "point.h"
 
-#define LOOP 4800
+#define LOOP 17000
 
 /* !	適当です	!
  * 素因数が見つからなかった    : 0
@@ -117,8 +117,8 @@ int main (int argc, char *argv[])
 		
 		found = 0;
 		total_start = omp_get_wtime();
-		int n = 240;
-		//int n = omp_get_max_threads();
+		//int n = 240;
+		int n = omp_get_max_threads();
 		fprintf(fp,"threads = %d\n", n);
 		#pragma omp parallel num_threads(n) shared(found)
 		{

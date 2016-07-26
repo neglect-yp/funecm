@@ -30,9 +30,9 @@ void print_bit(unsigned long int n)
  * ビット数をカウントする関数
  * unsigned long int n :ビット数をカウントする
  */
-static unsigned long int count_bit(unsigned long int n)
+static long int count_bit(unsigned long int n)
 {
-	unsigned long int count = 0;
+	long int count = 0;
 	while (n != 0) {
 		n >>= 1;
 		count++;
@@ -56,10 +56,10 @@ void scalar(PROJECTIVE_POINT R, PROJECTIVE_POINT P, const unsigned long int k, c
 	extended_point_init(eP);
 	extended_point_set(eP, tP);
 
-	unsigned long int m = count_bit(k);
+	long int m = count_bit(k);
 	char *bit = (char *)malloc(m);
 
-	unsigned long int i = 0;
+	long int i = 0;
 	for (i = 0; i < m; i++) {
 		bit[i] = (k >> i) & 1;
 	}
@@ -77,7 +77,7 @@ void scalar(PROJECTIVE_POINT R, PROJECTIVE_POINT P, const unsigned long int k, c
 	mpz_mod(Parray[2]->X, Parray[2]->X, N);
 	mpz_mul(Parray[2]->Y, Parray[2]->Y, inv);
 	mpz_mod(Parray[2]->Y, Parray[2]->Y, N);
-	mpz_mul(Parray[2]->T, Parray[2]->T, inv);
+	mpz_mul(Parray[2]->T, Parray[2]->X, Parray[2]->Y);
 	mpz_mod(Parray[2]->T, Parray[2]->T, N);
 	mpz_set_ui(Parray[2]->Z, 1);
 	for (i = 1; i <= 7; i++) {
@@ -88,7 +88,7 @@ void scalar(PROJECTIVE_POINT R, PROJECTIVE_POINT P, const unsigned long int k, c
 		mpz_mod(Parray[2*i+1]->X, Parray[2*i+1]->X, N);
 		mpz_mul(Parray[2*i+1]->Y, Parray[2*i+1]->Y, inv);
 		mpz_mod(Parray[2*i+1]->Y, Parray[2*i+1]->Y, N);
-		mpz_mul(Parray[2*i+1]->T, Parray[2*i+1]->T, inv);
+		mpz_mul(Parray[2*i+1]->T, Parray[2*i+1]->X, Parray[2*i+1]->Y);
 		mpz_mod(Parray[2*i+1]->T, Parray[2*i+1]->T, N);
 		mpz_set_ui(Parray[2*i+1]->Z, 1);
 	}
@@ -110,7 +110,7 @@ void scalar(PROJECTIVE_POINT R, PROJECTIVE_POINT P, const unsigned long int k, c
 			dedicated_doubling(tP, tP, N);
 			i--;
 		} else {
-			int t = i-3 > 0 ? i-3 : 0;
+			long int t = ((i-3 > 0) ? i-3 : 0);
 			while (!bit[t])
 				t++;
 			int h = 0;

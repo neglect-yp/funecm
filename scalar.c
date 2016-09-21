@@ -45,8 +45,8 @@ static long int count_bit(unsigned long int n)
  * const unsigned long int k :スカラー倍k
  * const mpz_t D             :楕円曲線の係数
  * const mpz_t N             :mod N
- * */
-void scalar(PROJECTIVE_POINT R, PROJECTIVE_POINT P, const unsigned long int k, const mpz_t D, const mpz_t N)
+ */
+void scalar(PROJECTIVE_POINT R, PROJECTIVE_POINT P, const unsigned long int k, const mpz_t D, const int window_size, const mpz_t N)
 {
 	EXTENDED_POINT tP;
 	extended_point_init(tP);
@@ -64,8 +64,8 @@ void scalar(PROJECTIVE_POINT R, PROJECTIVE_POINT P, const unsigned long int k, c
 		bit[i] = (k >> i) & 1;
 	}
 
-	/* 移動窓法のための事前計算 */	
-	EXTENDED_POINT *Parray = (EXTENDED_POINT *)malloc(16*sizeof(EXTENDED_POINT));
+	/* 移動窓法のための事前計算 */
+	EXTENDED_POINT *Parray = (EXTENDED_POINT *)malloc((1<<window_size)*sizeof(EXTENDED_POINT)); // allocate 2^window_size
 	extended_point_init(Parray[1]);
 	extended_point_set(Parray[1], eP);
 	extended_point_init(Parray[2]);
@@ -80,7 +80,7 @@ void scalar(PROJECTIVE_POINT R, PROJECTIVE_POINT P, const unsigned long int k, c
 	mpz_mul(Parray[2]->T, Parray[2]->X, Parray[2]->Y);
 	mpz_mod(Parray[2]->T, Parray[2]->T, N);
 	mpz_set_ui(Parray[2]->Z, 1);
-	for (i = 1; i <= 7; i++) {
+	for (i = 1; i <= (1<<(window_size-1))-1; i++) { // to 2^(window_size-1) - 1
 		extended_point_init(Parray[2*i+1]);
 		extended_dedicated_add(Parray[2*i+1],Parray[2*i-1],Parray[2],N);
 		mpz_invert(inv, Parray[2*i+1]->Z, N);
@@ -95,22 +95,12 @@ void scalar(PROJECTIVE_POINT R, PROJECTIVE_POINT P, const unsigned long int k, c
 	mpz_clear(inv);
 
 	i = m - 1;
-	/* バイナリー法で計算を行う */
-	/*
-	while (i > 0) {
-		i--;
-		dedicated_doubling(tP, tP, N);
-		if (bit[i] == 1) {
-			extended_dedicated_add(tP, tP, eP, N);
-		}
-	}
-	*/
 	while (i > 0) {
 		if (!bit[i]) {
 			dedicated_doubling(tP, tP, N);
 			i--;
 		} else {
-			long int t = ((i-3 > 0) ? i-3 : 0);
+			long int t = ((i-(window_size-1) > 0) ? i-(window_size-1) : 0);
 			while (!bit[t])
 				t++;
 			int h = 0;
@@ -129,12 +119,13 @@ void scalar(PROJECTIVE_POINT R, PROJECTIVE_POINT P, const unsigned long int k, c
 
 	exttopro(R, tP, N);
 
-	/* メモリーの解放 */
+	/* メモリの解放 */
 	extended_point_clear(tP);
 	extended_point_clear(eP);
 	extended_point_clear(Parray[1]);
 	extended_point_clear(Parray[2]);
-	for (i = 1; i <= 7; i++)
+	for (i = 1; i <= (1<<(window_size-1)-1); i++) {
 		extended_point_clear(Parray[2*i+1]);
+	}
 	free(Parray);
 }

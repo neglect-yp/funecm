@@ -26,7 +26,7 @@
  * const unsigned long int Y  :ベースポイントPのY座標
  * const unsigned long int k  :スカラー倍
  */
-void ecm(mpz_t f, const mpz_t N, const mpz_t Y, const unsigned long int k, FILE *fp)
+void ecm(mpz_t f, const mpz_t N, const mpz_t Y, const unsigned long int k, FILE *fp, const int window_size)
 {
 	/* 使用変数・構造体の宣言 */
 	PROJECTIVE_POINT P;
@@ -83,9 +83,8 @@ void ecm(mpz_t f, const mpz_t N, const mpz_t Y, const unsigned long int k, FILE 
 			mpz_mod(P->Y, P->Y, N);
 			mpz_set_ui(P->Z, 1);
 
-			scalar(P, P, p, d, N);
+			scalar(P, P, p, d, window_size, N);
 			mpz_gcd(f, P->X, N);
-			//gmp_printf("gcd(%Zd, %Zd) = %Zd\n", pP->Z, N, f);
 			if (mpz_cmp_ui(f,1) != 0) {
 				goto FOUND;
 			}

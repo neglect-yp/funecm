@@ -20,8 +20,6 @@
 #include <omp.h>
 #include "point.h"
 
-#define LOOP 17000
-
 /* !	適当です	!
  * 素因数が見つからなかった    : 0
  * エラー終了                  : 1
@@ -41,15 +39,33 @@ int main (int argc, char *argv[])
 	/* オプション処理 */
 	int opt;
 	int loop = 0;
-	while ((opt = getopt (argc, argv, "hl")) != -1) {
+	int number_of_elliptic_curves = 4000;
+	int window_size = 4;
+	while ((opt = getopt (argc, argv, "hlc:w:")) != -1) {
 		switch (opt) {
 			case 'h':
 				fprintf(stdout, "Usage: funecm [options] <composite number> <k> <filename>\n");
 				fprintf(stdout, "-h: help\n");
+				fprintf(stdout, "-c <number>: number of elliptic curves\n");
+				fprintf(stdout, "-w <bit>: window size\n");
 				return 0;
 				break;
 			case 'l':
 				loop = 1;
+				break;
+			case 'c':
+				number_of_elliptic_curves = atoi(optarg);
+				if (number_of_elliptic_curves == 0) {
+					fprintf(stderr, "Error: the argument of 'c' option must be number\n");
+					return 1;
+				}
+				break;
+			case 'w':
+				window_size = atoi(optarg);
+				if (window_size <= 1 || 31 <= window_size) {
+					fprintf(stderr, "Error: the argument of 'w' option must be [2-30]\n");
+					return 1;
+				}
 				break;
 			default:
 				fprintf(stderr, "No such option\n");
@@ -114,16 +130,17 @@ int main (int argc, char *argv[])
 		mpz_get_str(digits, 10, N);
 		fprintf(fp,"digits: %d\n", strlen(digits));
 		gmp_fprintf(fp,"k: %ld\n", k);
+		fprintf(fp,"elliptic curves: %d\n", number_of_elliptic_curves);
+		fprintf(fp,"window size: %d\n", window_size);
 		
 		found = 0;
 		total_start = omp_get_wtime();
-		//int n = 240;
 		int n = omp_get_max_threads();
 		fprintf(fp,"threads = %d\n", n);
 		#pragma omp parallel num_threads(n) shared(found)
 		{
 			#pragma omp for
-			for (i = 0; i < LOOP; i++) {
+			for (i = 0; i < number_of_elliptic_curves; i++) {
 				/* Yを乱数で生成する */
 				mpz_t Y;
 				mpz_init(Y);
@@ -144,7 +161,7 @@ int main (int argc, char *argv[])
 				if (found == 0) {
 					A_start = omp_get_wtime();
 
-					ecm(factor, N, Y, k, fp);
+					ecm(factor, N, Y, k, fp, window_size);
 					mpz_divexact(cofactor, N, factor);
 					/* 因数が1又はNだった場合係数を変えてやり直す */
 					if (mpz_cmp_ui(factor, 1) == 0 || mpz_cmp(factor, N) == 0) {

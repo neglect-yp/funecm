@@ -124,7 +124,7 @@ void scalar(PROJECTIVE_POINT R, PROJECTIVE_POINT P, const unsigned long int k, c
 	extended_point_clear(eP);
 	extended_point_clear(Parray[1]);
 	extended_point_clear(Parray[2]);
-	for (i = 1; i <= (1<<(window_size-1)-1); i++) {
+	for (i = 1; i <= (1<<(window_size-1))-1; i++) {
 		extended_point_clear(Parray[2*i+1]);
 	}
 	free(Parray);

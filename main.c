@@ -30,12 +30,6 @@
  */
 int main (int argc, char *argv[])
 {
-	if (argc <= 3) {
-		fprintf (stderr, "Error: Need three Argument\n");
-		fprintf (stderr, "Usage: funecm [options] <composite number> <k> <filename>\n");
-		return 1;
-	}
-
 	/* オプション処理 */
 	int opt;
 	int loop = 0;
@@ -72,6 +66,12 @@ int main (int argc, char *argv[])
 				fprintf(stdout, "Usage: funecm [options] <composite number> <k> <filename>\n");
 				return 1;
 		}
+	}
+
+	if (argc <= 3) {
+		fprintf (stderr, "Error: Need three Argument\n");
+		fprintf (stderr, "Usage: funecm [options] <composite number> <k> <filename>\n");
+		return 1;
 	}
 
 	/* ARGUMENT CONVERSION */

@@ -26,7 +26,7 @@
  * const unsigned long int Y  :ベースポイントPのY座標
  * const unsigned long int k  :スカラー倍
  */
-void ecm(mpz_t f, const mpz_t N, const mpz_t Y, const unsigned long int k, FILE *fp, const int window_size)
+void ecm(mpz_t f, const mpz_t N, const mpz_t X, const mpz_t Y, mpz_t d, const unsigned long int k, FILE *fp, const int window_size)
 {
 	/* 使用変数・構造体の宣言 */
 	PROJECTIVE_POINT P;
@@ -45,24 +45,29 @@ void ecm(mpz_t f, const mpz_t N, const mpz_t Y, const unsigned long int k, FILE 
 	projective_point_init(P);
 
 	/* Pの点の座標を指定 */
-	mpz_set_ui(P->X, 2);
+	if (X == NULL)
+		mpz_set_ui(P->X, 2);
+	else
+		mpz_set(P->X, X);
 	mpz_set(P->Y, Y);
 	mpz_set_ui(P->Z, 1);
 
 	/* dの決定 */
-	mpz_t d;
-	mpz_init(d);
-	mpz_pow_ui(tmp,P->X,2); //tmp = x^2
-	mpz_mod(tmp,tmp,N);
-	mpz_pow_ui(tmp2,P->Y,2); //tmp2 = y^2
-	mpz_mod(tmp2,tmp2,N);
-	mpz_sub(d,tmp2,tmp); //d = y^2-x^2
-	mpz_sub_ui(d,d,1); //d = y^2-x^2-1
-	mpz_mul(tmp,tmp,tmp2); //tmp = x^2y^2
-	mpz_mod(tmp,tmp,N);
-	mpz_invert(tmp,tmp,N);
-	mpz_mul(d,d,tmp); //dの値
-	mpz_mod(d,d,N);
+	//mpz_t d;
+	if (X == NULL) {
+		mpz_init(d);
+		mpz_pow_ui(tmp,P->X,2); //tmp = x^2
+		mpz_mod(tmp,tmp,N);
+		mpz_pow_ui(tmp2,P->Y,2); //tmp2 = y^2
+		mpz_mod(tmp2,tmp2,N);
+		mpz_sub(d,tmp2,tmp); //d = y^2-x^2
+		mpz_sub_ui(d,d,1); //d = y^2-x^2-1
+		mpz_mul(tmp,tmp,tmp2); //tmp = x^2y^2
+		mpz_mod(tmp,tmp,N);
+		mpz_invert(tmp,tmp,N);
+		mpz_mul(d,d,tmp); //dの値
+		mpz_mod(d,d,N);
+	}
 
 	/* 素数の決定 */
 	unsigned long int p = 2;
@@ -98,7 +103,8 @@ FOUND:
 
 	/* 使用変数・関数の開放 */
 	projective_point_clear(P);
-	mpz_clear(d);
+	//if (X == NULL)
+	//	mpz_clear(d);
 	mpz_clear(tmp);
 	mpz_clear(tmp2);
 	mpz_clear(inv);

@@ -1,7 +1,7 @@
 # Makefile
 
 PROGRAM = funecm
-OBJS = point.o double_add.o normal_add.o ecm.o scalar.o main.o
+OBJS = atkin.o point.o double_add.o normal_add.o ecm.o scalar.o main.o
 CC = icc
 # CFLAGS = -mmic -openmp -O2
 CFLAGS = -openmp -O2
@@ -28,6 +28,8 @@ ecm.o: ecm.c
 	$(CC) $(CFLAGS) -c $<
 scalar.o: scalar.c
 	$(CC) $(CFLAGS) -c $<
+atkin.o: atkin.c
+	$(CC) $(CFALGS) -c $<
 
 .PHONY: clean
 clean:

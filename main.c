@@ -35,7 +35,8 @@ int main (int argc, char *argv[])
 	int loop = 0;
 	int number_of_elliptic_curves = 4000;
 	int window_size = 4;
-	while ((opt = getopt (argc, argv, "hlc:w:")) != -1) {
+	int atkin_flag = 0;
+	while ((opt = getopt (argc, argv, "hlc:w:a")) != -1) {
 		switch (opt) {
 			case 'h':
 				fprintf(stdout, "Usage: funecm [options] <composite number> <k> <filename>\n");
@@ -60,6 +61,9 @@ int main (int argc, char *argv[])
 					fprintf(stderr, "Error: the argument of 'w' option must be [2-30]\n");
 					return 1;
 				}
+				break;
+			case 'a':
+				atkin_flag = 1;
 				break;
 			default:
 				fprintf(stderr, "No such option\n");
@@ -137,19 +141,34 @@ int main (int argc, char *argv[])
 		total_start = omp_get_wtime();
 		int n = omp_get_max_threads();
 		fprintf(fp,"threads = %d\n", n);
-		#pragma omp parallel num_threads(n) shared(found)
+
+		/* atkin-moraine ECPP 用の変数 */
+		mpz_t s, t;
+		mpz_inits(s, t, NULL);
+		mpz_set_ui(s, 12);
+		mpz_set_ui(t, 40);
+
+		#pragma omp parallel num_threads(n) shared(found,s,t)
 		{
 			#pragma omp for
 			for (i = 0; i < number_of_elliptic_curves; i++) {
-				/* Yを乱数で生成する */
-				mpz_t Y;
-				mpz_init(Y);
-				gmp_randstate_t state;
-				gmp_randinit_default(state);
-				gmp_randseed_ui(state, (unsigned long int)time(NULL)+i);
-				mpz_urandomm(Y, state, N);
-				while (mpz_cmp_ui(Y, 2) < 0)
-					mpz_add_ui(Y, Y, 1);
+				mpz_t X, Y, d;
+				mpz_inits(X, Y, d, NULL);
+
+				if (atkin_flag) {
+					/* atkin-moraine ECPP を用いて X, Y を決定する */
+					atkin_moraine(X, Y, d, s, t, N);
+					gmp_printf("X=%Zd, ",X);
+				} else {
+					/* Yを乱数で生成する */
+					gmp_randstate_t state;
+					gmp_randinit_default(state);
+					gmp_randseed_ui(state, (unsigned long int)time(NULL)+i);
+					mpz_urandomm(Y, state, N);
+					while (mpz_cmp_ui(Y, 2) < 0)
+						mpz_add_ui(Y, Y, 1);
+				} 
+
 				gmp_printf("Y=%Zd\n",Y);
 
 				mpz_t factor;
@@ -161,7 +180,11 @@ int main (int argc, char *argv[])
 				if (found == 0) {
 					A_start = omp_get_wtime();
 
-					ecm(factor, N, Y, k, fp, window_size);
+					if (atkin_flag)
+						ecm(factor, N, X, Y, d, k, fp, window_size);
+					else
+						ecm(factor, N, NULL, Y, d, k, fp, window_size);
+
 					mpz_divexact(cofactor, N, factor);
 					/* 因数が1又はNだった場合係数を変えてやり直す */
 					if (mpz_cmp_ui(factor, 1) == 0 || mpz_cmp(factor, N) == 0) {
@@ -173,7 +196,7 @@ int main (int argc, char *argv[])
 						printf("factor not found\n");
 						printf("--------------------------------------------------\n");
 						*/
-						mpz_clear(Y);
+						mpz_clears(X, Y, d, NULL);
 						mpz_clear(factor);
 						mpz_clear(cofactor);
 						continue;
@@ -217,17 +240,16 @@ int main (int argc, char *argv[])
 						
 					}
 				}
-				mpz_clear(Y);
+				mpz_clears(X, Y, d, NULL);
 				mpz_clear(factor);
 				mpz_clear(cofactor);
 			}
-		   }
+		}
 		total_end = omp_get_wtime();
 		fprintf(fp,"total time: %.3lf seconds\n\n\n", (total_end - total_start));
+		mpz_clears(s, t, NULL);
 	}while(loop==1&&found==1);
 	
-	/* メモリの解放*/
-	/*affine_point_clear(P);*/
 	fclose(fp);
 
 	return 0;

@@ -53,7 +53,6 @@ void ecm(mpz_t f, const mpz_t N, const mpz_t X, const mpz_t Y, mpz_t d, const un
 	mpz_set_ui(P->Z, 1);
 
 	/* dの決定 */
-	//mpz_t d;
 	if (X == NULL) {
 		mpz_init(d);
 		mpz_pow_ui(tmp,P->X,2); //tmp = x^2
@@ -79,7 +78,10 @@ void ecm(mpz_t f, const mpz_t N, const mpz_t X, const mpz_t Y, mpz_t d, const un
 	while (p <= k) {
 		/* e = log p kを決める */
 		e = (int)(log(k) / log(p));
+		// int m = 1;
 		for (i = 1; i <= e; i++) {
+			// m *= p;
+
 			/* Zを1にするための処理 */
 			mpz_invert(inv, P->Z, N);
 			mpz_mul(P->X, P->X, inv);
@@ -94,6 +96,7 @@ void ecm(mpz_t f, const mpz_t N, const mpz_t X, const mpz_t Y, mpz_t d, const un
 				goto FOUND;
 			}
 		}
+
 		/* pを次の素数に */
 		mpz_nextprime(prime, prime);
 		p = mpz_get_ui(prime);
@@ -103,8 +106,6 @@ FOUND:
 
 	/* 使用変数・関数の開放 */
 	projective_point_clear(P);
-	//if (X == NULL)
-	//	mpz_clear(d);
 	mpz_clear(tmp);
 	mpz_clear(tmp2);
 	mpz_clear(inv);

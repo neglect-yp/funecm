@@ -104,11 +104,6 @@ int main (int argc, char *argv[])
 			break;
 	}
 
-	/*
-	AFFINE_POINT P;
-	affine_point_init(P);
-	*/
-	
 	/*コマンドライン引数からファイル名取得、拡張子が無ければ付ける*/
 	FILE *fp;
 	char f_name[64];
@@ -189,13 +184,11 @@ int main (int argc, char *argv[])
 					/* 因数が1又はNだった場合係数を変えてやり直す */
 					if (mpz_cmp_ui(factor, 1) == 0 || mpz_cmp(factor, N) == 0) {
 						A_end = omp_get_wtime();
-						gmp_fprintf(fp,"stage1 time: %.3lf seconds\nY=%Zd\nfactor not found\n--------------------------------------------------\n", (A_end - A_start),Y);
+						if (atkin_flag)
+							gmp_fprintf(fp,"stage1 time: %.3lf seconds\nX=%Zd\nY=%Zd\nfactor not found\n--------------------------------------------------\n", (A_end - A_start),X,Y);
+						else
+							gmp_fprintf(fp,"stage1 time: %.3lf seconds\nY=%Zd\nfactor not found\n--------------------------------------------------\n", (A_end - A_start),Y);
 						
-						/*
-						printf("stage1 time: %.3lf seconds\n", (A_end - A_start));
-						printf("factor not found\n");
-						printf("--------------------------------------------------\n");
-						*/
 						mpz_clears(X, Y, d, NULL);
 						mpz_clear(factor);
 						mpz_clear(cofactor);

@@ -80,7 +80,7 @@ void scalar(PROJECTIVE_POINT R, PROJECTIVE_POINT P, const unsigned long int k, c
 	mpz_mul(Parray[2]->T, Parray[2]->X, Parray[2]->Y);
 	mpz_mod(Parray[2]->T, Parray[2]->T, N);
 	mpz_set_ui(Parray[2]->Z, 1);
-	for (i = 1; i <= (1<<(window_size-1))-1; i++) { // to 2^(window_size-1) - 1
+	for (i = 1; i <= (1<<(window_size-1))-1; i++) { // from 1 to 2^(window_size-1) - 1
 		extended_point_init(Parray[2*i+1]);
 		extended_dedicated_add(Parray[2*i+1],Parray[2*i-1],Parray[2],N);
 		mpz_invert(inv, Parray[2*i+1]->Z, N);
@@ -94,6 +94,7 @@ void scalar(PROJECTIVE_POINT R, PROJECTIVE_POINT P, const unsigned long int k, c
 	}
 	mpz_clear(inv);
 
+	/* sliding window method */
 	i = m - 1;
 	while (i > 0) {
 		if (!bit[i]) {

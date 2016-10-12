@@ -24,9 +24,9 @@
  * mpz_t f              :発見した素因数
  * const mpz_t N              :素因数分解したい合成数
  * const unsigned long int Y  :ベースポイントPのY座標
- * const unsigned long int k  :スカラー倍
+ * const unsigned long int B1  :スカラー倍
  */
-void ecm(mpz_t f, const mpz_t N, const mpz_t X, const mpz_t Y, mpz_t d, const unsigned long int k, FILE *fp, const int window_size)
+void ecm(mpz_t f, const mpz_t N, const mpz_t X, const mpz_t Y, mpz_t d, const unsigned long int B1, const unsigned long int B2, FILE *fp, const int window_size)
 {
 	/* 使用変数・構造体の宣言 */
 	PROJECTIVE_POINT P;
@@ -74,14 +74,11 @@ void ecm(mpz_t f, const mpz_t N, const mpz_t X, const mpz_t Y, mpz_t d, const un
 	mpz_init(prime);
 	mpz_set_ui(prime, p);
 
-	/* 内部計算 */
-	while (p <= k) {
+	/* stage1 */
+	while (p <= B1) {
 		/* e = log p kを決める */
-		e = (int)(log(k) / log(p));
-		// int m = 1;
+		e = (int)(log(B1) / log(p));
 		for (i = 1; i <= e; i++) {
-			// m *= p;
-
 			/* Zを1にするための処理 */
 			mpz_invert(inv, P->Z, N);
 			mpz_mul(P->X, P->X, inv);
@@ -93,7 +90,7 @@ void ecm(mpz_t f, const mpz_t N, const mpz_t X, const mpz_t Y, mpz_t d, const un
 			scalar(P, P, p, d, window_size, N);
 			mpz_gcd(f, P->X, N);
 			if (mpz_cmp_ui(f,1) != 0) {
-				goto FOUND;
+				goto STAGE1_FACTOR_FOUND;
 			}
 		}
 
@@ -101,7 +98,36 @@ void ecm(mpz_t f, const mpz_t N, const mpz_t X, const mpz_t Y, mpz_t d, const un
 		mpz_nextprime(prime, prime);
 		p = mpz_get_ui(prime);
 	}
-FOUND:
+
+	/* stage2 */
+	mpz_t product;
+	mpz_init(product);
+	mpz_set_ui(product, 1);
+	while (p <= B2) {
+		/* Zを1にするための処理 */
+		mpz_invert(inv, P->Z, N);
+		mpz_mul(P->X, P->X, inv);
+		mpz_mod(P->X, P->X, N);
+		mpz_mul(P->Y, P->Y, inv);
+		mpz_mod(P->Y, P->Y, N);
+		mpz_set_ui(P->Z, 1);
+
+		scalar(P, P, p, d, window_size, N);
+		mpz_mul(product, product, P->Z);
+		mpz_mod(product, product, N);
+		
+		gmp_printf("product=%Zd\n", product);
+
+		mpz_nextprime(prime, prime);
+		p = mpz_get_ui(prime);
+	}
+	mpz_gcd(f, product, N);
+	if (mpz_cmp_ui(f,1) != 0) {
+		gmp_fprintf(fp,"find a factor in the Stage2\n");
+	}
+	mpz_clear(product);
+
+STAGE1_FACTOR_FOUND:
 	gmp_fprintf(fp,"Stage1: d = %Zd\n", d);
 
 	/* 使用変数・関数の開放 */

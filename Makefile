@@ -3,7 +3,10 @@
 PROGRAM = funecm
 OBJS = atkin.o point.o double_add.o normal_add.o ecm.o scalar.o main.o
 CC = icc
-# CFLAGS = -mmic -openmp -O2
+# for Xeon phi
+#CFLAGS = -mmic -openmp -O2
+#LIBDIR = -L/usr/local/lib
+# for Xeon
 CFLAGS = -openmp -O2
 LIBDIR = -L/home/project8/gmp/lib
 LIBRARY = -lgmp -lrt
@@ -29,7 +32,7 @@ ecm.o: ecm.c
 scalar.o: scalar.c
 	$(CC) $(CFLAGS) -c $<
 atkin.o: atkin.c
-	$(CC) $(CFALGS) -c $<
+	$(CC) $(CFLAGS) -c $<
 
 .PHONY: clean
 clean:

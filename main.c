@@ -32,6 +32,7 @@ int main (int argc, char *argv[])
 {
 	/* オプション処理 */
 	int opt;
+	int optc = 0;
 	int loop = 0;
 	int number_of_elliptic_curves = 4000;
 	int window_size = 4;
@@ -70,22 +71,24 @@ int main (int argc, char *argv[])
 				fprintf(stdout, "Usage: funecm [options] <composite number> <k> <filename>\n");
 				return 1;
 		}
+		optc++;
 	}
 
-	if (argc <= 3) {
+	if ((argc - optc) <= 3) {
 		fprintf (stderr, "Error: Need three Argument\n");
 		fprintf (stderr, "Usage: funecm [options] <composite number> <k> <filename>\n");
 		return 1;
 	}
 
-	/* ARGUMENT CONVERSION */
 	mpz_t N;
 	mpz_init_set_str(N, argv[optind++], 10);
-	unsigned long int k;
-	k = (unsigned long int)strtol(argv[optind++], NULL, 10);
+	unsigned long int B1;
+	unsigned long int B2;
+	B1 = (unsigned long int)strtol(argv[optind++], NULL, 10);
+	B2 = B1 * 100;
 
 	/* 修正予定 */
-	if (k <= 2)
+	if (B1 <= 2)
 		return 0;
 
 	switch (mpz_probab_prime_p (N, 25)) {
@@ -128,7 +131,8 @@ int main (int argc, char *argv[])
 		gmp_fprintf(fp,"Input number: %Zd  ", N);
 		mpz_get_str(digits, 10, N);
 		fprintf(fp,"digits: %d\n", strlen(digits));
-		gmp_fprintf(fp,"k: %ld\n", k);
+		gmp_fprintf(fp,"B1=%ld\n", B1);
+		gmp_fprintf(fp,"B2=%ld\n", B2);
 		fprintf(fp,"elliptic curves: %d\n", number_of_elliptic_curves);
 		fprintf(fp,"window size: %d\n", window_size);
 		
@@ -176,9 +180,9 @@ int main (int argc, char *argv[])
 					A_start = omp_get_wtime();
 
 					if (atkin_flag)
-						ecm(factor, N, X, Y, d, k, fp, window_size);
+						ecm(factor, N, X, Y, d, B1, B2, fp, window_size);
 					else
-						ecm(factor, N, NULL, Y, d, k, fp, window_size);
+						ecm(factor, N, NULL, Y, d, B1, B2, fp, window_size);
 
 					mpz_divexact(cofactor, N, factor);
 					/* 因数が1又はNだった場合係数を変えてやり直す */

@@ -40,10 +40,11 @@ int main (int argc, char *argv[])
 	while ((opt = getopt (argc, argv, "hlc:w:a")) != -1) {
 		switch (opt) {
 			case 'h':
-				fprintf(stdout, "Usage: funecm [options] <composite number> <k> <filename>\n");
+				fprintf(stdout, "Usage: funecm [options] <composite number> <B1> <B2> <filename>\n");
 				fprintf(stdout, "-h: help\n");
 				fprintf(stdout, "-c <number>: number of elliptic curves\n");
 				fprintf(stdout, "-w <bit>: window size\n");
+				fprintf(stdout, "-a: use Atkin-Moraine ECPP\n");
 				return 0;
 				break;
 			case 'l':
@@ -68,7 +69,7 @@ int main (int argc, char *argv[])
 				break;
 			default:
 				fprintf(stderr, "No such option\n");
-				fprintf(stdout, "Usage: funecm [options] <composite number> <k> <filename>\n");
+				fprintf(stdout, "Usage: funecm [options] <composite number> <B1> <B2> <filename>\n");
 				return 1;
 		}
 		optc++;
@@ -76,7 +77,7 @@ int main (int argc, char *argv[])
 
 	if ((argc - optc) <= 3) {
 		fprintf (stderr, "Error: Need three Argument\n");
-		fprintf (stderr, "Usage: funecm [options] <composite number> <k> <filename>\n");
+		fprintf (stderr, "Usage: funecm [options] <composite number> <B1> <B2> <filename>\n");
 		return 1;
 	}
 
@@ -85,7 +86,9 @@ int main (int argc, char *argv[])
 	unsigned long int B1;
 	unsigned long int B2;
 	B1 = (unsigned long int)strtol(argv[optind++], NULL, 10);
-	B2 = B1 * 100;
+	B2 = (unsigned long int)atol(argv[optind++]);
+	if (B2 == 0)
+		B2 = B1 * 100;
 
 	/* 修正予定 */
 	if (B1 <= 2)
@@ -183,16 +186,18 @@ int main (int argc, char *argv[])
 						ecm(factor, N, X, Y, d, B1, B2, fp, window_size);
 					else
 						ecm(factor, N, NULL, Y, d, B1, B2, fp, window_size);
+					A_end = omp_get_wtime();
+
+					/* ファイルにログを出力する */
+					if (atkin_flag)
+						gmp_fprintf(fp,"total time: %.3lf seconds\nX=%Zd\nY=%Zd\n--------------------------------------------------\n", (A_end - A_start),X,Y);
+					else
+						gmp_fprintf(fp,"total time: %.3lf seconds\nY=%Zd\n--------------------------------------------------\n", (A_end - A_start),Y);
 
 					mpz_divexact(cofactor, N, factor);
 					/* 因数が1又はNだった場合係数を変えてやり直す */
 					if (mpz_cmp_ui(factor, 1) == 0 || mpz_cmp(factor, N) == 0) {
-						A_end = omp_get_wtime();
-						if (atkin_flag)
-							gmp_fprintf(fp,"stage1 time: %.3lf seconds\nX=%Zd\nY=%Zd\nfactor not found\n--------------------------------------------------\n", (A_end - A_start),X,Y);
-						else
-							gmp_fprintf(fp,"stage1 time: %.3lf seconds\nY=%Zd\nfactor not found\n--------------------------------------------------\n", (A_end - A_start),Y);
-						
+						fprintf(fp, "factor not found\n\n");
 						mpz_clears(X, Y, d, NULL);
 						mpz_clear(factor);
 						mpz_clear(cofactor);
@@ -204,13 +209,13 @@ int main (int argc, char *argv[])
 					/* 終了ステータス */
 					switch (mpz_probab_prime_p(factor, 25)) {
 						case 2:
-							gmp_fprintf(fp,"@ definite prime factor found: %Zd  digits: %d cofactor: %Zd\n", factor, strlen(digits), cofactor);
+							gmp_fprintf(fp,"@ definite prime factor found: %Zd  digits: %d cofactor: %Zd\n\n", factor, strlen(digits), cofactor);
 							break;
 						case 1:
-							gmp_fprintf(fp,"@ probable prime factor found: %Zd  digits: %d cofactor: %Zd\n", factor, strlen(digits), cofactor);
+							gmp_fprintf(fp,"@ probable prime factor found: %Zd  digits: %d cofactor: %Zd\n\n", factor, strlen(digits), cofactor);
 							break;
 						case 0:
-							gmp_fprintf(fp,"@ composite prime factor found: %Zd  digits: %d cofactor: %Zd\n", factor, strlen(digits), cofactor);
+							gmp_fprintf(fp,"@ composite prime factor found: %Zd  digits: %d cofactor: %Zd\n\n", factor, strlen(digits), cofactor);
 							break;
 						default:
 							break;
@@ -236,6 +241,7 @@ int main (int argc, char *argv[])
 						}
 						
 					}
+
 				}
 				mpz_clears(X, Y, d, NULL);
 				mpz_clear(factor);

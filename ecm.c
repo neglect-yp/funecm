@@ -13,6 +13,8 @@
 
 #include <stdio.h>
 #include <math.h>
+#include <time.h>
+#include <omp.h>
 #include "gmp.h"
 #include "point.h"
 
@@ -74,6 +76,9 @@ void ecm(mpz_t f, const mpz_t N, const mpz_t X, const mpz_t Y, mpz_t d, const un
 	mpz_init(prime);
 	mpz_set_ui(prime, p);
 
+	double stage1_time, stage2_time = -1;
+	double start, end;
+	start = omp_get_wtime();
 	/* stage1 */
 	while (p <= B1) {
 		/* e = log p kを決める */
@@ -90,7 +95,9 @@ void ecm(mpz_t f, const mpz_t N, const mpz_t X, const mpz_t Y, mpz_t d, const un
 			scalar(P, P, p, d, window_size, N);
 			mpz_gcd(f, P->X, N);
 			if (mpz_cmp_ui(f,1) != 0) {
-				goto STAGE1_FACTOR_FOUND;
+				end = omp_get_wtime();
+				stage1_time = end - start;
+				goto FACTOR_FOUND;
 			}
 		}
 
@@ -98,7 +105,10 @@ void ecm(mpz_t f, const mpz_t N, const mpz_t X, const mpz_t Y, mpz_t d, const un
 		mpz_nextprime(prime, prime);
 		p = mpz_get_ui(prime);
 	}
+	end = omp_get_wtime();
+	stage1_time = end - start;
 
+	start = omp_get_wtime();
 	/* stage2 */
 	mpz_t product;
 	mpz_init(product);
@@ -115,20 +125,22 @@ void ecm(mpz_t f, const mpz_t N, const mpz_t X, const mpz_t Y, mpz_t d, const un
 		scalar(P, P, p, d, window_size, N);
 		mpz_mul(product, product, P->Z);
 		mpz_mod(product, product, N);
-		
-		gmp_printf("product=%Zd\n", product);
 
 		mpz_nextprime(prime, prime);
 		p = mpz_get_ui(prime);
 	}
 	mpz_gcd(f, product, N);
-	if (mpz_cmp_ui(f,1) != 0) {
-		gmp_fprintf(fp,"find a factor in the Stage2\n");
-	}
 	mpz_clear(product);
+	end = omp_get_wtime();
+	stage2_time = end - start;
 
-STAGE1_FACTOR_FOUND:
+FACTOR_FOUND:
 	gmp_fprintf(fp,"Stage1: d = %Zd\n", d);
+	fprintf(fp, "Stage1 time: %f seconds\n", stage1_time);
+	if (stage2_time != -1)
+		fprintf(fp, "Stage2 time: %f seconds\n", stage2_time);
+	else
+		fprintf(fp, "Stage2 time: ----\n");
 
 	/* 使用変数・関数の開放 */
 	projective_point_clear(P);

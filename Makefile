@@ -3,18 +3,15 @@
 PROGRAM = funecm
 OBJS = atkin.o point.o double_add.o normal_add.o ecm.o scalar.o main.o
 CC = icc
-# for Xeon phi
-#CFLAGS = -mmic -openmp -O2
-#LIBDIR = -L/usr/local/lib
-# for Xeon
-CFLAGS = -openmp -O2
-LIBDIR = -L/home/project8/gmp/lib
 LIBRARY = -lgmp -lrt
 
-# gccによるコンパイル
-# CC = gcc
-# CFLAGS = -fopenmp -O2
-# LIBRARY = -lgmp -lrt -lm
+ifeq ($(ARCHITECTURE),Xeonphi) # for Xeonphi
+	CFLAGS = -mmic -openmp -O2
+	LIBDIR = -L/usr/local/lib
+else # for Xeon
+	CFLAGS = -openmp -O2
+	LIBDIR = -L/home/project8/gmp/lib
+endif
 
 $(PROGRAM): $(OBJS)
 	$(CC) $(CFLAGS) -o $(PROGRAM) $^ $(LIBRARY) $(LIBDIR)
@@ -34,7 +31,8 @@ scalar.o: scalar.c
 atkin.o: atkin.c
 	$(CC) $(CFLAGS) -c $<
 
-.PHONY: clean
+all: clean $(PROGRAM)
+
 clean:
-	$(RM) $(PROGRAM) $(OBJS)
+	-rm -f $(PROGRAM) $(OBJS)
 

@@ -96,15 +96,27 @@ void scalar(PROJECTIVE_POINT R, PROJECTIVE_POINT P, const unsigned long int k, c
 
 	/* sliding window method */
 	i = m - 1;
+	long int t = ((i-(window_size-1) > 0) ? i-(window_size-1) : 0);
+	while (!bit[t])
+		t++;
+	int h = 0;
+	while (i >= t) {
+		h *= 2;
+		if (bit[i])
+			h++;
+		i--;
+	}
+	extended_point_set(tP, Parray[h]);
+
 	while (i > 0) {
 		if (!bit[i]) {
 			dedicated_doubling(tP, tP, N);
 			i--;
 		} else {
-			long int t = ((i-(window_size-1) > 0) ? i-(window_size-1) : 0);
+			t = ((i-(window_size-1) > 0) ? i-(window_size-1) : 0);
 			while (!bit[t])
 				t++;
-			int h = 0;
+			h = 0;
 			while (i >= t) {
 				h *= 2;
 				if (bit[i])

@@ -2225,5 +2225,8 @@ enum
 #define __GNU_MP_VERSION_PATCHLEVEL 3
 #define __GNU_MP_RELEASE (__GNU_MP_VERSION * 10000 + __GNU_MP_VERSION_MINOR * 100 + __GNU_MP_VERSION_PATCHLEVEL)
 
+/* mpz_mul -> mpz_mod */
+#define mpz_mul_mod(z,x,y,N) do { mpz_mul(z,x,y); mpz_mod(z,z,N); } while (0)
+
 #define __GMP_H__
 #endif /* __GMP_H__ */

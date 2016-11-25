@@ -1,48 +1,29 @@
- /*
- * 更新履歴
- * 2014/10/17 新規作成
- * 2014/10/19 バグ修正
- * 2014/11/01 各宣言をマクロに修正
- * 2014/11/02 引数の一部をconstに変更
- * 2015/10/** 前年度より計算式を変更
- * 2016/05/27 a=-1に変更 Extended Twisted Edwards Coodinatesに対応
- */
 #include <stdio.h>
 #include "gmp.h"
 #include "point.h"
 
-/* 
- * バイナリ法における加算公式を用いる部分では、Pを足すことになるが、P->Zが1のときは
- * mixed addition アルゴリズムを用いることができる。
- * R <- P + Q
- */
-
-void extended_dedicated_add(EXTENDED_POINT R, EXTENDED_POINT P, EXTENDED_POINT Q, const mpz_t N) {
+void extended_dedicated_add(EXTENDED_POINT R, EXTENDED_POINT P, EXTENDED_POINT Q, const mpz_t N)
+{
 	mpz_t A,B,C,D,E,F,G,H,tmp;
 	
-	/*初期化*/
 	mpz_inits(A,B,C,D,E,F,G,H,tmp,NULL);
 	
 	/* A<-(Y1-X1)*(Y2+X2) */
 	mpz_sub(A, P->Y, P->X);
 	mpz_add(tmp, Q->Y, Q->X);
-	mpz_mul(A, A, tmp);
-	mpz_mod(A, A, N);
+	mpz_mul_mod(A, A, tmp, N);
 
 	/* B<-(Y1+X1)*(Y2-X2) */
 	mpz_add(B, P->Y, P->X);
 	mpz_sub(tmp, Q->Y, Q->X);
-	mpz_mul(B, B, tmp);
-	mpz_mod(B, B, N);
+	mpz_mul_mod(B, B, tmp, N);
 
 	/* C<-2*Z1*T2 */
 	mpz_mul_ui(C, P->Z, 2);
-	mpz_mul(C, C, Q->T);
-	mpz_mod(C, C, N);
+	mpz_mul_mod(C, C, Q->T, N);
 
 	/* D<-2*T1*Z2 */
 	mpz_mul_ui(D, P->T, 2);
-	//mpz_mul(D, D, Q->Z); //Z2 = 1
 	mpz_mod(D, D, N);
 	
 	/* E<-D+C */
@@ -62,20 +43,13 @@ void extended_dedicated_add(EXTENDED_POINT R, EXTENDED_POINT P, EXTENDED_POINT Q
 	mpz_mod(H, H, N);
 
 	/* X3<-E*F */
-	mpz_mul(R->X, E, F);
-	mpz_mod(R->X, R->X, N);
+	mpz_mul_mod(R->X, E, F, N);
 	
 	/* Y3<-G*H */
-	mpz_mul(R->Y, G, H);
-	mpz_mod(R->Y, R->Y, N);
-
-	/* T3<-E*H */
-	//mpz_mul(R->T, E, H);
-	//mpz_mod(R->T, R->T, N);
+	mpz_mul_mod(R->Y, G, H, N);
 
 	/* Z3<-F*G */
-	mpz_mul(R->Z, F, G);
-	mpz_mod(R->Z, R->Z, N);
+	mpz_mul_mod(R->Z, F, G, N);
 
 	mpz_clears(A,B,C,D,E,F,G,H,tmp,NULL);
 }

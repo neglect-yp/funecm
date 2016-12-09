@@ -80,7 +80,7 @@ void scalar(PROJECTIVE_POINT R, PROJECTIVE_POINT P, const unsigned long int k, c
 	}
 	extended_point_set(tP, Parray[h]);
 
-	while (i > 0) {
+	while (i >= 0) {
 		if (!bit[i]) {
 			dedicated_doubling(tP, tP, N);
 			i--;
